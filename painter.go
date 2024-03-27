@@ -615,6 +615,26 @@ func (p *Painter) TextFit(body string, x, y, width int, textAligns ...string) ch
 	return output
 }
 
+func (p *Painter) MeasureTextWithWrap(body string, width int, textWrap chart.TextWrap) chart.Box {
+	styleWithWrap := p.style
+	styleWithWrap.TextWrap = textWrap
+	lines := chart.Text.WrapFit(p.render, body, width, styleWithWrap)
+
+	var output chart.Box
+	for index, line := range lines {
+		if line == "" {
+			continue
+		}
+		lineBox := p.render.MeasureText(line)
+		output.Right = chart.MaxInt(lineBox.Right, output.Right)
+		output.Bottom += lineBox.Height()
+		if index < len(lines)-1 {
+			output.Bottom += styleWithWrap.GetTextLineSpacing()
+		}
+	}
+	return output
+}
+
 func (p *Painter) Ticks(opt TicksOption) *Painter {
 	if opt.Count <= 0 || opt.Length <= 0 {
 		return p
