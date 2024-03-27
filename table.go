@@ -57,6 +57,11 @@ type TableCell struct {
 	Column int
 }
 
+type CellSpan struct {
+	RowFrom int
+	RowTo   int
+}
+
 type TableChartOption struct {
 	// The output type
 	Type string
@@ -93,6 +98,8 @@ type TableChartOption struct {
 	CellTextStyle func(TableCell) *Style
 	// CellStyle customize drawing style of table cell
 	CellStyle func(TableCell) *Style
+
+	RowSpans map[int][]CellSpan
 }
 
 type TableSetting struct {
@@ -292,23 +299,45 @@ func (t *tableChart) render() (*renderInfo, error) {
 		cellMaxHeight := 0
 		paddingHeight := cellPadding.Top + cellPadding.Bottom
 		paddingWidth := cellPadding.Left + cellPadding.Right
-		for index, text := range textList {
+		for colIndex, text := range textList {
 			cellStyle := getCellTextStyle(TableCell{
 				Text:   text,
 				Row:    rowIndex,
-				Column: index,
+				Column: colIndex,
 				Style:  currentStyle,
 			})
 			if cellStyle == nil {
 				cellStyle = &currentStyle
 			}
 			p.SetStyle(*cellStyle)
-			x := values[index]
-			y := currentHeight + cellPadding.Top
-			width := values[index+1] - x
+			x := values[colIndex]
+			width := values[colIndex+1] - x - paddingWidth
 			x += cellPadding.Left
-			width -= paddingWidth
-			box := p.TextFit(text, x, y+int(fontSize), width, getTextAlign(index))
+
+			paddingMultiplier := 1.0
+			skipCell := false
+			if spans, ok := opt.RowSpans[colIndex]; ok {
+				for _, span := range spans {
+					if rowIndex < span.RowFrom || rowIndex > span.RowTo {
+						continue
+					}
+					if rowIndex == span.RowFrom {
+						spanLen := float64(span.RowTo - span.RowFrom + 1)
+						textHeight := float64(p.MeasureTextWithWrap(text, width, chart.TextWrapWord).Height())
+						paddingMultiplier = spanLen + (textHeight * (spanLen - 1) / float64(paddingHeight))
+						break
+					}
+					skipCell = (rowIndex <= span.RowTo)
+				}
+			}
+			if skipCell {
+				continue
+			}
+
+			y := currentHeight + int(float64(padding.Top)*paddingMultiplier)
+
+			box := p.TextFit(text, x, y+int(fontSize), width, getTextAlign(colIndex))
+
 			// 计算最高的高度
 			if box.Height()+paddingHeight > cellMaxHeight {
 				cellMaxHeight = box.Height() + paddingHeight
