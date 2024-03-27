@@ -300,6 +300,9 @@ func (t *tableChart) render() (*renderInfo, error) {
 		paddingHeight := cellPadding.Top + cellPadding.Bottom
 		paddingWidth := cellPadding.Left + cellPadding.Right
 		for colIndex, text := range textList {
+			if opt.isCellInsideSpan(rowIndex, colIndex) {
+				continue
+			}
 			cellStyle := getCellTextStyle(TableCell{
 				Text:   text,
 				Row:    rowIndex,
@@ -313,31 +316,8 @@ func (t *tableChart) render() (*renderInfo, error) {
 			x := values[colIndex]
 			width := values[colIndex+1] - x - paddingWidth
 			x += cellPadding.Left
-
-			paddingMultiplier := 1.0
-			skipCell := false
-			if spans, ok := opt.RowSpans[colIndex]; ok {
-				for _, span := range spans {
-					if rowIndex < span.RowFrom || rowIndex > span.RowTo {
-						continue
-					}
-					if rowIndex == span.RowFrom {
-						spanLen := float64(span.RowTo - span.RowFrom + 1)
-						textHeight := float64(p.MeasureTextWithWrap(text, width, chart.TextWrapWord).Height())
-						paddingMultiplier = spanLen + (textHeight * (spanLen - 1) / float64(paddingHeight))
-						break
-					}
-					skipCell = (rowIndex <= span.RowTo)
-				}
-			}
-			if skipCell {
-				continue
-			}
-
-			y := currentHeight + int(float64(padding.Top)*paddingMultiplier)
-
-			box := p.TextFit(text, x, y+int(fontSize), width, getTextAlign(colIndex))
-
+			y := currentHeight + padding.Top + int(fontSize)
+			box := p.TextFit(text, x, y, width, getTextAlign(colIndex))
 			// 计算最高的高度
 			if box.Height()+paddingHeight > cellMaxHeight {
 				cellMaxHeight = box.Height() + paddingHeight
@@ -360,9 +340,38 @@ func (t *tableChart) render() (*renderInfo, error) {
 		height += cellHeight
 	}
 
+	for colIndex, spans := range opt.RowSpans {
+		for _, span := range spans {
+			x := values[colIndex]
+			width := values[colIndex+1] - x - padding.Width()
+			x += padding.Left
+
+			text := opt.Data[span.RowFrom][colIndex]
+
+			textHeight := p.MeasureTextWithWrap(text, width, chart.TextWrapWord).Height()
+			fullHeight := sumInt(info.RowHeights[span.RowFrom-1 : span.RowTo])
+			cellY := headerHeight + sumInt(info.RowHeights[:span.RowFrom-1])
+			y := cellY + fullHeight/2 - int(textHeight)/2
+			p.TextFit(text, x, y, width, getTextAlign(colIndex))
+		}
+	}
+
 	info.Width = p.Width()
 	info.Height = height
 	return &info, nil
+}
+
+func (t *TableChartOption) isCellInsideSpan(rowIndex int, colIndex int) bool {
+	spans, ok := t.RowSpans[colIndex]
+	if !ok {
+		return false
+	}
+	for _, span := range spans {
+		if rowIndex >= span.RowFrom && rowIndex <= span.RowTo {
+			return true
+		}
+	}
+	return false
 }
 
 func (t *tableChart) renderWithInfo(info *renderInfo) (Box, error) {
