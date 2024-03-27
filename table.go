@@ -400,6 +400,22 @@ func (t *tableChart) renderWithInfo(info *renderInfo) (Box, error) {
 		child.SetBackground(p.Width(), h, color, true)
 		currentHeight += h
 	}
+
+	for colIndex, spans := range opt.RowSpans {
+		for index, span := range spans {
+			color := rowColors[index%len(rowColors)]
+			top := info.HeaderHeight + sumInt(info.RowHeights[:span.RowFrom-1])
+			left := sumInt(info.ColumnWidths[:colIndex])
+			child := p.Child(PainterPaddingOption(Box{
+				Top:  top,
+				Left: left,
+			}))
+			width := info.ColumnWidths[colIndex]
+			height := sumInt(info.RowHeights[span.RowFrom-1 : span.RowTo])
+			child.SetBackground(width, height, color, true)
+		}
+	}
+
 	// 根据是否有设置表格样式调整背景色
 	getCellStyle := opt.CellStyle
 	if getCellStyle != nil {
