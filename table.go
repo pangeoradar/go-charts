@@ -395,7 +395,7 @@ func (t *tableChart) renderWithInfo(info *renderInfo) (Box, error) {
 		p.SetBackground(info.Width, info.HeaderHeight, headerBGColor, true)
 	}
 
-	if !opt.DisableHeaderBackground {
+	if !opt.DisableRowBackground {
 		// 如果设置表头背景色
 		currentHeight := info.HeaderHeight
 		rowColors := opt.RowBackgroundColors
