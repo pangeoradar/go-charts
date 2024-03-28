@@ -98,17 +98,17 @@ type TableChartOption struct {
 	CellTextStyle func(TableCell) *Style
 	// CellStyle customize drawing style of table cell
 	CellStyle func(TableCell) *Style
-
+	// specifies the rows a cell should span (in specified column)
 	RowSpans map[int][]CellSpan
-
+	// enable cells stroke
 	EnableStroke bool
-
+	// cells stroke color
 	StrokeColor Color
-
+	// cells stroke width
 	StrokeWidth float64
-
+	// enable header background
 	EnableHeaderBackground bool
-
+	// enable rows background (from RowBackgroundColors)
 	EnableRowsBackground bool
 }
 
