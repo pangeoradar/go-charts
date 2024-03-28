@@ -355,13 +355,11 @@ func (t *tableChart) render() (*renderInfo, error) {
 			x := values[colIndex]
 			width := values[colIndex+1] - x - padding.Width()
 			x += padding.Left
-
 			text := opt.Data[span.RowFrom][colIndex]
-
 			textHeight := p.MeasureTextWithWrap(text, width, chart.TextWrapWord).Height()
 			fullHeight := sumInt(info.RowHeights[span.RowFrom-1 : span.RowTo])
 			cellY := headerHeight + sumInt(info.RowHeights[:span.RowFrom-1])
-			y := cellY + fullHeight/2 - int(textHeight)/2
+			y := cellY + fullHeight/2 + int(textHeight)/2
 			p.TextFit(text, x, y, width, getTextAlign(colIndex))
 		}
 	}
