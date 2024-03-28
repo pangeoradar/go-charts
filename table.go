@@ -310,7 +310,7 @@ func (t *tableChart) render() (*renderInfo, error) {
 		paddingHeight := cellPadding.Top + cellPadding.Bottom
 		paddingWidth := cellPadding.Left + cellPadding.Right
 		for colIndex, text := range textList {
-			if opt.isCellInsideSpan(rowIndex, colIndex) {
+			if rowIndex > 0 && opt.isCellInsideSpan(rowIndex-1, colIndex) {
 				continue
 			}
 			cellStyle := getCellTextStyle(TableCell{
@@ -357,8 +357,8 @@ func (t *tableChart) render() (*renderInfo, error) {
 			x += padding.Left
 			text := opt.Data[span.RowFrom][colIndex]
 			textHeight := p.MeasureTextWithWrap(text, width, chart.TextWrapWord).Height()
-			fullHeight := sumInt(info.RowHeights[span.RowFrom-1 : span.RowTo])
-			cellY := headerHeight + sumInt(info.RowHeights[:span.RowFrom-1])
+			fullHeight := sumInt(info.RowHeights[span.RowFrom : span.RowTo+1])
+			cellY := headerHeight + sumInt(info.RowHeights[:span.RowFrom])
 			y := cellY + fullHeight/2 + int(textHeight)/2
 			p.TextFit(text, x, y, width, getTextAlign(colIndex))
 		}
@@ -513,7 +513,7 @@ func (t *tableChart) stroke(info *renderInfo) {
 
 	for i, height := range info.RowHeights {
 		for j, width := range info.ColumnWidths {
-			if t.opt.isCellInsideSpan(i+1, j) {
+			if t.opt.isCellInsideSpan(i, j) {
 				continue
 			}
 			top := info.HeaderHeight + sumInt(info.RowHeights[:i])
@@ -529,10 +529,10 @@ func (t *tableChart) stroke(info *renderInfo) {
 
 	for colIndex, spans := range t.opt.RowSpans {
 		for _, span := range spans {
-			top := info.HeaderHeight + sumInt(info.RowHeights[:span.RowFrom-1])
+			top := info.HeaderHeight + sumInt(info.RowHeights[:span.RowFrom])
 			left := sumInt(info.ColumnWidths[:colIndex])
 			width := info.ColumnWidths[colIndex]
-			height := sumInt(info.RowHeights[span.RowFrom-1 : span.RowTo])
+			height := sumInt(info.RowHeights[span.RowFrom : span.RowTo+1])
 			t.p.Rect(Box{
 				Top:    top,
 				Left:   left,

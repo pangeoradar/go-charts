@@ -165,8 +165,8 @@ func TestTableChart(t *testing.T) {
 					RowSpans: map[int][]CellSpan{
 						4: {
 							{
-								RowFrom: 1,
-								RowTo:   2,
+								RowFrom: 0,
+								RowTo:   1,
 							},
 						},
 					},
