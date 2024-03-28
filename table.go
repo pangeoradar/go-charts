@@ -100,6 +100,10 @@ type TableChartOption struct {
 	CellStyle func(TableCell) *Style
 
 	RowSpans map[int][]CellSpan
+
+	StrokeColor Color
+
+	StrokeWidth float64
 }
 
 type TableSetting struct {
@@ -403,8 +407,8 @@ func (t *tableChart) renderWithInfo(info *renderInfo) (Box, error) {
 
 	p.SetDrawingStyle(Style{
 		FillColor:   opt.BackgroundColor,
-		StrokeWidth: 1,
-		StrokeColor: drawing.ColorBlack,
+		StrokeWidth: opt.StrokeWidth,
+		StrokeColor: opt.StrokeColor,
 	})
 	for colIndex, spans := range opt.RowSpans {
 		for _, span := range spans {

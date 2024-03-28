@@ -29,6 +29,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/wcharczuk/go-chart/v2/drawing"
 )
 
 func TestTableChart(t *testing.T) {
@@ -169,6 +170,8 @@ func TestTableChart(t *testing.T) {
 							},
 						},
 					},
+					StrokeColor: drawing.ColorBlack,
+					StrokeWidth: 1,
 				}).Render()
 				if err != nil {
 					return nil, err
