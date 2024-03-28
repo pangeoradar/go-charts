@@ -105,7 +105,7 @@ type TableChartOption struct {
 	// cells stroke color
 	StrokeColor Color
 	// cells stroke width
-	StrokeWidth int
+	StrokeWidth float64
 	// enable header background
 	EnableHeaderBackground bool
 	// enable rows background (from RowBackgroundColors)
@@ -496,7 +496,7 @@ func (t *tableChart) Render() (Box, error) {
 func (t *tableChart) stroke(info *renderInfo) {
 	t.p.SetDrawingStyle(Style{
 		FillColor:   Color{},
-		StrokeWidth: float64(t.opt.StrokeWidth),
+		StrokeWidth: t.opt.StrokeWidth,
 		StrokeColor: t.opt.StrokeColor,
 	})
 	defer t.p.ResetStyle()
