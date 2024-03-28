@@ -104,6 +104,9 @@ type TableChartOption struct {
 	StrokeColor Color
 
 	StrokeWidth float64
+
+	EnableHeaderBackground bool
+	EnableRowsBackground   bool
 }
 
 type TableSetting struct {
@@ -384,29 +387,33 @@ func (t *tableChart) renderWithInfo(info *renderInfo) (Box, error) {
 	if !opt.BackgroundColor.IsZero() {
 		p.SetBackground(p.Width(), p.Height(), opt.BackgroundColor)
 	}
-	headerBGColor := opt.HeaderBackgroundColor
-	if headerBGColor.IsZero() {
-		headerBGColor = tableDefaultSetting.HeaderColor
+
+	if opt.EnableHeaderBackground {
+		headerBGColor := opt.HeaderBackgroundColor
+		if headerBGColor.IsZero() {
+			headerBGColor = tableDefaultSetting.HeaderColor
+		}
+		p.SetBackground(info.Width, info.HeaderHeight, headerBGColor, true)
 	}
 
-	// 如果设置表头背景色
-	p.SetBackground(info.Width, info.HeaderHeight, headerBGColor, true)
-	currentHeight := info.HeaderHeight
-	rowColors := opt.RowBackgroundColors
-	if rowColors == nil {
-		rowColors = tableDefaultSetting.RowColors
+	if opt.EnableRowsBackground {
+		// 如果设置表头背景色
+		currentHeight := info.HeaderHeight
+		rowColors := opt.RowBackgroundColors
+		if rowColors == nil {
+			rowColors = tableDefaultSetting.RowColors
+		}
+		for index, h := range info.RowHeights {
+			color := rowColors[index%len(rowColors)]
+			child := p.Child(PainterPaddingOption(Box{
+				Top: currentHeight,
+			}))
+			child.SetBackground(p.Width(), h, color, true)
+			currentHeight += h
+		}
 	}
-	for index, h := range info.RowHeights {
-		color := rowColors[index%len(rowColors)]
-		child := p.Child(PainterPaddingOption(Box{
-			Top: currentHeight,
-		}))
-		child.SetBackground(p.Width(), h, color, true)
-		currentHeight += h
-	}
-
 	p.SetDrawingStyle(Style{
-		FillColor:   opt.BackgroundColor,
+		FillColor:   Color{},
 		StrokeWidth: opt.StrokeWidth,
 		StrokeColor: opt.StrokeColor,
 	})
