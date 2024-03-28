@@ -101,12 +101,15 @@ type TableChartOption struct {
 
 	RowSpans map[int][]CellSpan
 
+	EnableStroke bool
+
 	StrokeColor Color
 
 	StrokeWidth float64
 
 	EnableHeaderBackground bool
-	EnableRowsBackground   bool
+
+	EnableRowsBackground bool
 }
 
 type TableSetting struct {
@@ -412,26 +415,10 @@ func (t *tableChart) renderWithInfo(info *renderInfo) (Box, error) {
 			currentHeight += h
 		}
 	}
-	p.SetDrawingStyle(Style{
-		FillColor:   Color{},
-		StrokeWidth: opt.StrokeWidth,
-		StrokeColor: opt.StrokeColor,
-	})
-	for colIndex, spans := range opt.RowSpans {
-		for _, span := range spans {
-			top := info.HeaderHeight + sumInt(info.RowHeights[:span.RowFrom-1])
-			left := sumInt(info.ColumnWidths[:colIndex])
-			width := info.ColumnWidths[colIndex]
-			height := sumInt(info.RowHeights[span.RowFrom-1 : span.RowTo])
-			p.Rect(Box{
-				Top:    top,
-				Left:   left,
-				Bottom: top + height,
-				Right:  left + width,
-			})
-		}
+
+	if opt.EnableStroke {
+		t.stroke(info)
 	}
-	p.ResetStyle()
 
 	// 根据是否有设置表格样式调整背景色
 	getCellStyle := opt.CellStyle
@@ -506,4 +493,54 @@ func (t *tableChart) Render() (Box, error) {
 	}
 	p.render = r
 	return t.renderWithInfo(info)
+}
+
+func (t *tableChart) stroke(info *renderInfo) {
+	t.p.SetDrawingStyle(Style{
+		FillColor:   Color{},
+		StrokeWidth: t.opt.StrokeWidth,
+		StrokeColor: t.opt.StrokeColor,
+	})
+	defer t.p.ResetStyle()
+
+	for i, width := range info.ColumnWidths {
+		left := sumInt(info.ColumnWidths[:i])
+		t.p.Rect(Box{
+			Top:    0,
+			Left:   left,
+			Bottom: info.HeaderHeight,
+			Right:  left + width,
+		})
+	}
+
+	for i, height := range info.RowHeights {
+		for j, width := range info.ColumnWidths {
+			if t.opt.isCellInsideSpan(i+1, j) {
+				continue
+			}
+			top := info.HeaderHeight + sumInt(info.RowHeights[:i])
+			left := sumInt(info.ColumnWidths[:j])
+			t.p.Rect(Box{
+				Top:    top,
+				Left:   left,
+				Bottom: top + height,
+				Right:  left + width,
+			})
+		}
+	}
+
+	for colIndex, spans := range t.opt.RowSpans {
+		for _, span := range spans {
+			top := info.HeaderHeight + sumInt(info.RowHeights[:span.RowFrom-1])
+			left := sumInt(info.ColumnWidths[:colIndex])
+			width := info.ColumnWidths[colIndex]
+			height := sumInt(info.RowHeights[span.RowFrom-1 : span.RowTo])
+			t.p.Rect(Box{
+				Top:    top,
+				Left:   left,
+				Bottom: top + height,
+				Right:  left + width,
+			})
+		}
+	}
 }
