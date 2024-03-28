@@ -401,20 +401,26 @@ func (t *tableChart) renderWithInfo(info *renderInfo) (Box, error) {
 		currentHeight += h
 	}
 
+	p.SetDrawingStyle(Style{
+		FillColor:   opt.BackgroundColor,
+		StrokeWidth: 1,
+		StrokeColor: drawing.ColorBlack,
+	})
 	for colIndex, spans := range opt.RowSpans {
-		for index, span := range spans {
-			color := rowColors[index%len(rowColors)]
+		for _, span := range spans {
 			top := info.HeaderHeight + sumInt(info.RowHeights[:span.RowFrom-1])
 			left := sumInt(info.ColumnWidths[:colIndex])
-			child := p.Child(PainterPaddingOption(Box{
-				Top:  top,
-				Left: left,
-			}))
 			width := info.ColumnWidths[colIndex]
 			height := sumInt(info.RowHeights[span.RowFrom-1 : span.RowTo])
-			child.SetBackground(width, height, color, true)
+			p.Rect(Box{
+				Top:    top,
+				Left:   left,
+				Bottom: top + height,
+				Right:  left + width,
+			})
 		}
 	}
+	p.ResetStyle()
 
 	// 根据是否有设置表格样式调整背景色
 	getCellStyle := opt.CellStyle
