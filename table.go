@@ -100,16 +100,14 @@ type TableChartOption struct {
 	CellStyle func(TableCell) *Style
 	// specifies the rows a cell should span (in specified column)
 	RowSpans map[int][]CellSpan
-	// enable cells stroke
-	EnableStroke bool
 	// cells stroke color
 	StrokeColor Color
 	// cells stroke width
 	StrokeWidth float64
-	// enable header background
-	EnableHeaderBackground bool
-	// enable rows background (from RowBackgroundColors)
-	EnableRowsBackground bool
+	// disable header background
+	DisableHeaderBackground bool
+	// Disable rows background (from RowBackgroundColors)
+	DisableRowBackground bool
 }
 
 type TableSetting struct {
@@ -389,7 +387,7 @@ func (t *tableChart) renderWithInfo(info *renderInfo) (Box, error) {
 		p.SetBackground(p.Width(), p.Height(), opt.BackgroundColor)
 	}
 
-	if opt.EnableHeaderBackground {
+	if !opt.DisableHeaderBackground {
 		headerBGColor := opt.HeaderBackgroundColor
 		if headerBGColor.IsZero() {
 			headerBGColor = tableDefaultSetting.HeaderColor
@@ -397,7 +395,7 @@ func (t *tableChart) renderWithInfo(info *renderInfo) (Box, error) {
 		p.SetBackground(info.Width, info.HeaderHeight, headerBGColor, true)
 	}
 
-	if opt.EnableRowsBackground {
+	if !opt.DisableHeaderBackground {
 		// 如果设置表头背景色
 		currentHeight := info.HeaderHeight
 		rowColors := opt.RowBackgroundColors
@@ -414,7 +412,7 @@ func (t *tableChart) renderWithInfo(info *renderInfo) (Box, error) {
 		}
 	}
 
-	if opt.EnableStroke {
+	if opt.StrokeWidth > 0 {
 		t.stroke(info)
 	}
 

@@ -170,10 +170,9 @@ func TestTableChart(t *testing.T) {
 							},
 						},
 					},
-					StrokeColor:            drawing.ColorBlack,
-					StrokeWidth:            1,
-					EnableHeaderBackground: true,
-					EnableStroke:           true,
+					StrokeColor:          drawing.ColorBlack,
+					StrokeWidth:          1,
+					DisableRowBackground: true,
 				}).Render()
 				if err != nil {
 					return nil, err
