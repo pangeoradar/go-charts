@@ -63,6 +63,9 @@ type BarChartOption struct {
 	// The legend option
 	Legend   LegendOption
 	BarWidth int
+
+	Groups      [][]int
+	GroupsTheme BarGroupTheme
 }
 
 func (b *barChart) render(result *defaultRenderResult, seriesList SeriesList) (Box, error) {
@@ -140,6 +143,16 @@ func (b *barChart) render(result *defaultRenderResult, seriesList SeriesList) (B
 			if !item.Style.FillColor.IsZero() {
 				fillColor = item.Style.FillColor
 			}
+
+			if len(opt.Groups) > 0 {
+				groupIndex := opt.Groups[index][j]
+				if opt.GroupsTheme == "" {
+					opt.GroupsTheme = defaultBarGroupTheme
+				}
+				colors := barGroupThemes[opt.GroupsTheme]
+				fillColor = parseColor(colors[groupIndex%len(colors)])
+			}
+
 			top := barMaxHeight - h
 
 			seriesPainter.OverrideDrawingStyle(Style{
