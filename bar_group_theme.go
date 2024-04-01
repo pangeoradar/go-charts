@@ -3,15 +3,15 @@ package charts
 type BarGroupTheme string
 
 const (
-	Walden      BarGroupTheme = "Walden"
-	Essos       BarGroupTheme = "Essos"
-	Infographic BarGroupTheme = "Infographic"
-	Shine       BarGroupTheme = "Shine"
-	Macarons    BarGroupTheme = "Macarons"
-	Roma        BarGroupTheme = "Roma"
+	Walden      BarGroupTheme = "walden"
+	Essos       BarGroupTheme = "essos"
+	Infographic BarGroupTheme = "infographic"
+	Shine       BarGroupTheme = "shine"
+	Macarons    BarGroupTheme = "macarons"
+	Roma        BarGroupTheme = "roma"
 )
 
-const defaultBarGroupTheme = "Walden"
+const defaultBarGroupTheme = Walden
 
 var barGroupThemes = map[BarGroupTheme][]string{
 	Walden: {
