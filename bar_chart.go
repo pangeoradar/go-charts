@@ -65,7 +65,7 @@ type BarChartOption struct {
 	BarWidth int
 
 	Groups      [][]int
-	GroupsTheme BarGroupTheme
+	GroupsTheme ColorPalette
 }
 
 func (b *barChart) render(result *defaultRenderResult, seriesList SeriesList) (Box, error) {
@@ -146,11 +146,10 @@ func (b *barChart) render(result *defaultRenderResult, seriesList SeriesList) (B
 
 			if len(opt.Groups) > 0 {
 				groupIndex := opt.Groups[index][j]
-				if opt.GroupsTheme == "" {
-					opt.GroupsTheme = defaultBarGroupTheme
+				if opt.GroupsTheme == nil {
+					opt.GroupsTheme = NewTheme(defaultBarGroupTheme)
 				}
-				colors := barGroupThemes[opt.GroupsTheme]
-				fillColor = parseColor(colors[groupIndex%len(colors)])
+				fillColor = opt.GroupsTheme.GetSeriesColor(groupIndex)
 			}
 
 			top := barMaxHeight - h
