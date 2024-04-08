@@ -232,6 +232,12 @@ func (b *barChart) render(result *defaultRenderResult, seriesList SeriesList) (B
 func (b *barChart) Render() (Box, error) {
 	p := b.p
 	opt := b.opt
+	if opt.Legend.Theme == nil && opt.Groups != nil {
+		if opt.GroupsTheme == nil {
+			opt.GroupsTheme = NewTheme(defaultBarGroupTheme)
+		}
+		opt.Legend.Theme = opt.GroupsTheme
+	}
 	renderResult, err := defaultRender(p, defaultRenderOption{
 		Theme:        opt.Theme,
 		Padding:      opt.Padding,
