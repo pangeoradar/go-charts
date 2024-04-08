@@ -69,7 +69,7 @@ func TestBarChart(t *testing.T) {
 						6.0,
 						2.3,
 					},
-				})
+				}, ChartTypeBar)
 				for index := range seriesList {
 					seriesList[index].Label.Show = true
 				}
@@ -124,7 +124,7 @@ func TestBarChart(t *testing.T) {
 						6.4,
 						3.3,
 					},
-				})
+				}, ChartTypeBar)
 				_, err := NewBarChart(p, BarChartOption{
 					Padding: Box{
 						Left:   10,
