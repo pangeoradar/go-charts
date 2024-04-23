@@ -354,17 +354,19 @@ func (t *tableChart) render() (*renderInfo, error) {
 		height += cellHeight
 	}
 
-	for colIndex, spans := range opt.RowSpans {
-		for _, span := range spans {
-			x := values[colIndex]
-			width := values[colIndex+1] - x - padding.Width()
-			x += padding.Left
-			text := opt.Data[span.RowFrom][colIndex]
-			textHeight := p.MeasureTextWithWrap(text, width, chart.TextWrapWord).Height()
-			fullHeight := sumInt(info.RowHeights[span.RowFrom : span.RowTo+1])
-			cellY := headerHeight + sumInt(info.RowHeights[:span.RowFrom])
-			y := cellY + fullHeight/2 + int(textHeight)/2
-			p.TextFit(text, x, y, width, getTextAlign(colIndex))
+	if len(info.ColumnWidths) > 1 {
+		for colIndex, spans := range opt.RowSpans {
+			for _, span := range spans {
+				x := values[colIndex]
+				width := values[colIndex+1] - x - padding.Width()
+				x += padding.Left
+				text := opt.Data[span.RowFrom][colIndex]
+				textHeight := p.MeasureTextWithWrap(text, width, chart.TextWrapWord).Height()
+				fullHeight := sumInt(info.RowHeights[span.RowFrom : span.RowTo+1])
+				cellY := headerHeight + sumInt(info.RowHeights[:span.RowFrom])
+				y := cellY + fullHeight/2 + int(textHeight)/2
+				p.TextFit(text, x, y, width, getTextAlign(colIndex))
+			}
 		}
 	}
 
