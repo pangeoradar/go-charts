@@ -308,10 +308,15 @@ func (t *tableChart) render() (*renderInfo, error) {
 		paddingHeight := cellPadding.Top + cellPadding.Bottom
 		paddingWidth := cellPadding.Left + cellPadding.Right
 		for colIndex, text := range textList {
-			_, ok := opt.findSpan(rowIndex-1, colIndex)
-			if rowIndex > 0 && ok {
-				continue
+			if rowIndex > 0 {
+				realRowIndex := rowIndex - 1 // exclude header
+				span, ok := opt.findSpan(realRowIndex, colIndex)
+				skipSpan := ok && (len(textList) > 1 || realRowIndex != span.RowFrom)
+				if skipSpan {
+					continue
+				}
 			}
+
 			cellStyle := getCellTextStyle(TableCell{
 				Text:   text,
 				Row:    rowIndex,
