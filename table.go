@@ -308,7 +308,8 @@ func (t *tableChart) render() (*renderInfo, error) {
 		paddingHeight := cellPadding.Top + cellPadding.Bottom
 		paddingWidth := cellPadding.Left + cellPadding.Right
 		for colIndex, text := range textList {
-			if rowIndex > 0 && opt.isCellInsideSpan(rowIndex-1, colIndex) {
+			_, ok := opt.findSpan(rowIndex-1, colIndex)
+			if rowIndex > 0 && ok {
 				continue
 			}
 			cellStyle := getCellTextStyle(TableCell{
@@ -367,17 +368,17 @@ func (t *tableChart) render() (*renderInfo, error) {
 	return &info, nil
 }
 
-func (t *TableChartOption) isCellInsideSpan(rowIndex int, colIndex int) bool {
+func (t *TableChartOption) findSpan(rowIndex int, colIndex int) (CellSpan, bool) {
 	spans, ok := t.RowSpans[colIndex]
 	if !ok {
-		return false
+		return CellSpan{}, false
 	}
 	for _, span := range spans {
 		if rowIndex >= span.RowFrom && rowIndex <= span.RowTo {
-			return true
+			return span, true
 		}
 	}
-	return false
+	return CellSpan{}, false
 }
 
 func (t *tableChart) renderWithInfo(info *renderInfo) (Box, error) {
@@ -511,7 +512,7 @@ func (t *tableChart) stroke(info *renderInfo) {
 
 	for i, height := range info.RowHeights {
 		for j, width := range info.ColumnWidths {
-			if t.opt.isCellInsideSpan(i, j) {
+			if _, ok := t.opt.findSpan(i, j); ok {
 				continue
 			}
 			top := info.HeaderHeight + sumInt(info.RowHeights[:i])
